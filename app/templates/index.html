@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load custom_filter  %}
+
+{% load cart %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        
+        </ul>
+        {% if request.session.customer %}
+        <a class="navbar-brand" href="/logout">Logout</a>
+        <li class="nav-item">
+          <a class="navbar-brand" href="/cart">Cart</a>
+        <span class="badge badge-danger">{{request.session.cart.keys|length}}</span>
+        </li>
+        {% else %}
+        <a class="navbar-brand" href="/signin">Signin</a>
+        <a class="navbar-brand" href="/signup">SignUp</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  {% for message  in messages  %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Congratulations</strong> Your Order Has Placed Successfully
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div> 
+        {% endfor %}
+
+<!--card started-->
+    <div class="row">
+        {% for product in product %}
+        <div class="card mt-5 ms-3" style="width: 18rem;">
+            <img src="{{product.image.url}}" class="card-img-top " style="height:200px" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">{{product.name}}</h5>
+              <h5 class="card-text">{{product.price|currency }}</h5>
+              <div class="card-footer p-0  no-gutters">
+              {% if product|is_in_cart:request.session.cart %}
+                <div class="row  no-gutters ">
+                  <form action="/" class="col-2" method="POST">
+                    {% csrf_token %}
+                    <input type="text" hidden name="product" value='{{product.id}}'>
+                    <input type="text" hidden name="remove" value='True'>
+                    <input type="submit" value="-" class=" btn btn-block btn-secondary">
+                  </form>
+
+                  <div class="text-center col">{{product|cart_quantity:request.session.cart}} in cart</div>
+                  <form action="/" class="col-2" method="POST">
+                    {% csrf_token %}
+                    <input type="text" hidden name="product" value='{{product.id}}'>
+                    <input type="submit" value="+" class=" btn btn-block btn-secondary">
+                  </form>
+              </div>
+              {% else %}
+                <form action="/" method="POST" class="btn-block">
+                  {% csrf_token %}
+                  <input type="text" hidden name="product" value='{{product.id}}'>
+                  <input type="submit" class="float-right btn btn-light border " value="add to cart">
+                </form>
+                {% endif %}
+              </div>
+            </div>
+
+              </div>
+             
+        {% endfor %}
+    </div>
+<!--end card-->
+{% endblock content %}
